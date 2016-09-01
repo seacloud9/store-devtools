@@ -1,6 +1,6 @@
 {
   "name": "@ngrx/store-devtools",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Developer tools for @ngrx/store",
   "main": "./index.js",
   "scripts": {
