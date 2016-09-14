@@ -1,14 +1,15 @@
-import 'rxjs/add/observable/empty';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/switchMapTo';
-import 'rxjs/add/operator/takeUntil';
-import 'rxjs/add/operator/share';
-import { Observable } from 'rxjs/Observable';
 import { OpaqueToken, Inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { empty } from 'rxjs/observable/empty';
+import { filter } from 'rxjs/operator/filter';
+import { map } from 'rxjs/operator/map';
+import { share } from 'rxjs/operator/share';
+import { switchMap } from 'rxjs/operator/switchMap';
+import { takeUntil } from 'rxjs/operator/takeUntil';
 
 import { ActionTypes } from './actions';
-import { unliftState, unliftAction } from './utils';
 import { LiftedState } from './reducer';
+import { unliftState, unliftAction, applyOperators } from './utils';
 
 export const ExtensionActionTypes = {
   START: 'START',
@@ -57,7 +58,7 @@ export class DevtoolsExtension {
 
   private createChangesObservable(): Observable<any> {
     if (!this.devtoolsExtension) {
-      return Observable.empty();
+      return empty();
     }
 
     return new Observable(subscriber => {
@@ -71,29 +72,31 @@ export class DevtoolsExtension {
 
   private createActionStreams() {
     // Listens to all changes based on our instanceId
-    const changes$ = this.createChangesObservable().share();
+    const changes$ = share.call(this.createChangesObservable());
 
     // Listen for the start action
-    const start$ = changes$
-      .filter(change => change.type === ExtensionActionTypes.START);
+    const start$ = filter.call(changes$, change => change.type === ExtensionActionTypes.START);
 
     // Listen for the stop action
-    const stop$ = changes$
-      .filter(change => change.type === ExtensionActionTypes.STOP);
+    const stop$ = filter.call(changes$, change => change.type === ExtensionActionTypes.STOP);
 
     // Listen for lifted actions
-    const liftedActions$ = changes$
-      .filter(change => change.type === ExtensionActionTypes.DISPATCH)
-      .map(change => change.payload);
-      // .filter(action => action.type !== 'JUMP_TO_STATE');
+    const liftedActions$ = applyOperators(changes$, [
+      [ filter, change => change.type === ExtensionActionTypes.DISPATCH ],
+      [ map, change => change.payload ]
+    ]);
 
     // Listen for unlifted actions
-    const actions$ = changes$
-      .filter(change => change.type === ExtensionActionTypes.DISPATCH)
-      .map(change => change.payload);
+    const actions$ = applyOperators(changes$, [
+      [ filter, change => change.type === ExtensionActionTypes.DISPATCH ],
+      [ map, change => change.payload ]
+    ]);
+
+    const actionsUntilStop$ = takeUntil.call(actions$, stop$);
+    const liftedUntilStop$ = takeUntil.call(liftedActions$, stop$);
 
     // Only take the action sources between the start/stop events
-    this.actions$ = start$.switchMapTo(actions$.takeUntil(stop$));
-    this.liftedActions$ = start$.switchMapTo(liftedActions$.takeUntil(stop$));
+    this.actions$ = switchMap.call(start$, () => actionsUntilStop$);
+    this.liftedActions$ = switchMap.call(start$, () => liftedUntilStop$);
   }
 }

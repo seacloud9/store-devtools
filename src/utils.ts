@@ -1,4 +1,5 @@
 import { Action } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
 import { LiftedState } from './reducer';
 import { StoreDevtoolActions } from './actions';
 
@@ -25,4 +26,11 @@ export function unliftAction(liftedState: LiftedState) {
 */
 export function liftAction(action) {
   return StoreDevtoolActions.performAction(action);
+}
+
+
+export function applyOperators(input$: Observable<any>, operators: any[][]): Observable<any> {
+  return operators.reduce((source$, [ operator, ...args ]) => {
+    return operator.apply(source$, args);
+  }, input$);
 }

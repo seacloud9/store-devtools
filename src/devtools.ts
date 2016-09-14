@@ -1,22 +1,21 @@
-import 'rxjs/add/operator/scan';
-import 'rxjs/add/operator/merge';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/withLatestFrom';
-import 'rxjs/add/operator/publishReplay';
-import 'rxjs/add/operator/skip';
-import 'rxjs/add/operator/observeOn';
-
-import { Observer } from 'rxjs/Observer';
-import { Observable } from 'rxjs/Observable';
-import { queue } from 'rxjs/scheduler/queue';
-import { State, INITIAL_STATE, INITIAL_REDUCER, Dispatcher, Reducer } from '@ngrx/store';
 import { Injectable, Inject } from '@angular/core';
+import { State, INITIAL_STATE, INITIAL_REDUCER, Dispatcher, Reducer } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { Observer } from 'rxjs/Observer';
+import { map } from 'rxjs/operator/map';
+import { merge } from 'rxjs/operator/merge';
+import { observeOn } from 'rxjs/operator/observeOn';
+import { publishReplay } from 'rxjs/operator/publishReplay';
+import { scan } from 'rxjs/operator/scan';
+import { skip } from 'rxjs/operator/skip';
+import { withLatestFrom } from 'rxjs/operator/withLatestFrom';
+import { queue } from 'rxjs/scheduler/queue';
 
+import { DevtoolsExtension } from './extension';
+import { liftAction, unliftState, applyOperators } from './utils';
 import { liftReducerWith, liftInitialState, LiftedState } from './reducer';
 import { StoreDevtoolActions as actions } from './actions';
-import { liftAction, unliftState } from './utils';
 import { StoreDevtoolsConfig, STORE_DEVTOOLS_CONFIG } from './config';
-import { DevtoolsExtension } from './extension';
 
 @Injectable()
 export class DevtoolsDispatcher extends Dispatcher { }
@@ -40,30 +39,29 @@ export class StoreDevtools implements Observer<any> {
       maxAge: config.maxAge
     });
 
-    const liftedActions$ = actions$
-      .skip(1)
-      .merge(extension.actions$)
-      .map(liftAction)
-      .merge(dispatcher, extension.liftedActions$)
-      .observeOn(queue);
+    const liftedActions$ = applyOperators(actions$, [
+      [ skip, 1 ],
+      [ merge, extension.actions$ ],
+      [ map, liftAction ],
+      [ merge, dispatcher, extension.liftedActions$ ],
+      [ observeOn, queue ]
+    ]);
 
-    const liftedReducers$ = reducers$
-      .map(liftReducer);
+    const liftedReducers$ = map.call(reducers$, liftReducer);
 
-    const liftedState = liftedActions$
-      .withLatestFrom(liftedReducers$)
-      .scan((liftedState, [ action, reducer ]) => {
+    const liftedState = (applyOperators(liftedActions$, [
+      [ withLatestFrom, liftedReducers$ ],
+      [ scan, (liftedState, [ action, reducer ]) => {
         const nextState = reducer(liftedState, action);
 
         extension.notify(action, nextState);
 
         return nextState;
-      }, liftedInitialState)
-      .publishReplay(1)
-      .refCount();
+      }, liftedInitialState],
+      [ publishReplay, 1 ]
+    ]) as any).refCount();
 
-    const state = liftedState
-      .map(unliftState);
+    const state = map.call(liftedState, unliftState);
 
     this.dispatcher = dispatcher;
     this.liftedState = liftedState;

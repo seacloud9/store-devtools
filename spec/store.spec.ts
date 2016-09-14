@@ -4,7 +4,7 @@ import { ReflectiveInjector } from '@angular/core';
 import { TestBed, getTestBed } from '@angular/core/testing';
 import { StoreModule, Store, State, ActionReducer } from '@ngrx/store';
 
-import { StoreDevtools, StoreDevtoolsModule, LiftedState, Options } from '../src';
+import { StoreDevtools, StoreDevtoolsModule, LiftedState, StoreDevtoolsConfig } from '../';
 
 const counter = jasmine.createSpy('counter').and.callFake(function (state = 0, action) {
   switch (action.type) {
@@ -51,7 +51,7 @@ type Fixture<T> = {
   replaceReducer: (reducer) => void;
 };
 
-function createStore<T>(reducer: ActionReducer<T>, options: Options = {}): Fixture<T> {
+function createStore<T>(reducer: ActionReducer<T>, options: StoreDevtoolsConfig = {}): Fixture<T> {
   TestBed.configureTestingModule({
     imports: [
       StoreModule.provideStore(reducer),
