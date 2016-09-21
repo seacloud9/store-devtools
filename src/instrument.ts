@@ -8,7 +8,7 @@ import { DevtoolsExtension, REDUX_DEVTOOLS_EXTENSION } from './extension';
 
 export function _createReduxDevtoolsExtension() {
   if (typeof window !== 'undefined' && (window as any).devToolsExtension) {
-    return (window as any).devtoolsExtension;
+    return (window as any).devToolsExtension;
   }
 
   return null;

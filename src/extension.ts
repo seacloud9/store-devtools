@@ -48,11 +48,10 @@ export class DevtoolsExtension {
   }
 
   notify(action, state: LiftedState) {
-    if (!this.devtoolsExtension || action.type !== ActionTypes.PERFORM_ACTION) {
+    if (!this.devtoolsExtension) {
       return;
     }
 
-    this.devtoolsExtension.send(unliftAction(state), unliftState(state), false, this.instanceId);
     this.devtoolsExtension.send(null, state, false, this.instanceId);
   }
 
@@ -83,13 +82,13 @@ export class DevtoolsExtension {
     // Listen for lifted actions
     const liftedActions$ = applyOperators(changes$, [
       [ filter, change => change.type === ExtensionActionTypes.DISPATCH ],
-      [ map, change => change.payload ]
+      [ map,  change => this.unwrapAction(change) ]
     ]);
 
     // Listen for unlifted actions
     const actions$ = applyOperators(changes$, [
-      [ filter, change => change.type === ExtensionActionTypes.DISPATCH ],
-      [ map, change => change.payload ]
+      [ filter, change => change.type === ExtensionActionTypes.ACTION ],
+      [ map,  change => this.unwrapAction(change) ]
     ]);
 
     const actionsUntilStop$ = takeUntil.call(actions$, stop$);
@@ -98,5 +97,9 @@ export class DevtoolsExtension {
     // Only take the action sources between the start/stop events
     this.actions$ = switchMap.call(start$, () => actionsUntilStop$);
     this.liftedActions$ = switchMap.call(start$, () => liftedUntilStop$);
+  }
+
+  private unwrapAction(action) {
+    return typeof action === 'string' ? eval(`(${action})`) : action;
   }
 }
