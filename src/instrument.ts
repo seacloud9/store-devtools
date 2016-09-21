@@ -1,5 +1,5 @@
+import { NgModule, OpaqueToken, Injector, ModuleWithProviders } from '@angular/core';
 import { StoreModule, State, INITIAL_STATE, INITIAL_REDUCER, Dispatcher, Reducer } from '@ngrx/store';
-import { NgModule, OpaqueToken } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { StoreDevtools, DevtoolsDispatcher } from './devtools';
 import { StoreDevtoolsConfig, STORE_DEVTOOLS_CONFIG } from './config';
@@ -7,8 +7,10 @@ import { DevtoolsExtension, REDUX_DEVTOOLS_EXTENSION } from './extension';
 
 
 export function _createReduxDevtoolsExtension() {
-  if (typeof window !== 'undefined' && (window as any).devToolsExtension) {
-    return (window as any).devToolsExtension;
+  const extensionKey = 'devToolsExtension';
+
+  if (typeof window === 'object' && typeof window[extensionKey] !== 'undefined') {
+    return window[extensionKey];
   }
 
   return null;
@@ -20,6 +22,43 @@ export function _createState(devtools: StoreDevtools) {
 
 export function _createReducer(dispatcher: DevtoolsDispatcher, reducer) {
   return new Reducer(dispatcher, reducer);
+}
+
+export function _createStateIfExtension(extension: any, injector: Injector) {
+  if (!!extension) {
+    const devtools: StoreDevtools = injector.get(StoreDevtools);
+
+    return _createState(devtools);
+  }
+  else {
+    const initialState: any = injector.get(INITIAL_STATE);
+    const dispatcher: Dispatcher = injector.get(Dispatcher);
+    const reducer: Reducer = injector.get(Reducer);
+
+    return new State(initialState, dispatcher, reducer);
+  }
+}
+
+export function _createReducerIfExtension(extension: any, injector: Injector) {
+  if (!!extension) {
+    const devtoolsDispatcher: DevtoolsDispatcher = injector.get(DevtoolsDispatcher);
+    const reducer: any = injector.get(INITIAL_REDUCER);
+
+    return _createReducer(devtoolsDispatcher, reducer);
+  }
+  else {
+    const dispatcher: Dispatcher = injector.get(Dispatcher);
+    const reducer: any = injector.get(INITIAL_REDUCER);
+
+    return new Reducer(dispatcher, reducer);
+  }
+}
+
+export function _createExtensionOptions(): StoreDevtoolsConfig {
+  return {
+    maxAge: Infinity,
+    monitor: () => null
+  };
 }
 
 @NgModule({
@@ -62,6 +101,28 @@ export class StoreDevtoolsModule {
           useFactory: _createReducer
         },
         { provide: STORE_DEVTOOLS_CONFIG, useValue: options }
+      ]
+    };
+  }
+
+  static instrumentOnlyWithExtension(): ModuleWithProviders {
+    return {
+      ngModule: StoreDevtoolsModule,
+      providers: [
+        {
+          provide: State,
+          deps: [ REDUX_DEVTOOLS_EXTENSION, Injector ],
+          useFactory: _createStateIfExtension
+        },
+        {
+          provide: Reducer,
+          deps: [ REDUX_DEVTOOLS_EXTENSION, Injector ],
+          useFactory: _createReducerIfExtension
+        },
+        {
+          provide: STORE_DEVTOOLS_CONFIG,
+          useFactory: _createExtensionOptions
+        }
       ]
     };
   }

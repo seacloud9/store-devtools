@@ -82,13 +82,13 @@ export class DevtoolsExtension {
     // Listen for lifted actions
     const liftedActions$ = applyOperators(changes$, [
       [ filter, change => change.type === ExtensionActionTypes.DISPATCH ],
-      [ map,  change => this.unwrapAction(change) ]
+      [ map,  change => this.unwrapAction(change.payload) ]
     ]);
 
     // Listen for unlifted actions
     const actions$ = applyOperators(changes$, [
       [ filter, change => change.type === ExtensionActionTypes.ACTION ],
-      [ map,  change => this.unwrapAction(change) ]
+      [ map,  change => this.unwrapAction(change.payload) ]
     ]);
 
     const actionsUntilStop$ = takeUntil.call(actions$, stop$);
