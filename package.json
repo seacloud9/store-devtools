@@ -1,6 +1,6 @@
 {
   "name": "@ngrx/store-devtools",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Developer tools for @ngrx/store",
   "main": "./bundles/store-devtools.umd.js",
   "module": "./index.js",
