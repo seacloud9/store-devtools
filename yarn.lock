@@ -20,6 +20,14 @@
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@angular/core/-/core-2.1.1.tgz#2100ba90023c8184bd1ea7a63f194b15e8c2dfe1"
 
+"@angular/platform-browser":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@angular/platform-browser/-/platform-browser-2.1.1.tgz#03687a14bb914b113d1068aa0a44b5820109c0c0"
+
+"@angular/platform-browser-dynamic":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@angular/platform-browser-dynamic/-/platform-browser-dynamic-2.1.1.tgz#d1e671abbc35c4c3dab01d266a239ebfb0ef8b6e"
+
 "@angular/platform-server@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@angular/platform-server/-/platform-server-2.1.1.tgz#e4bd7b9f3dd20789a4d820a3fcc47ea174de7483"
