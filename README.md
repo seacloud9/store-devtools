@@ -7,8 +7,29 @@ Devtools for [@ngrx/store](https://github.com/ngrx/store).
 ## Installation
 `npm install @ngrx/store-devtools --save`
 
-### Instrumentation
-To instrument @ngrx/store and use the devtools, you will need to setup the instrumentation providers using `instrumentStore()`:
+
+## Instrumentation
+### Instrumentation with the Chrome Extension (Preferred)
+
+1. Download the [Redux Devtools Extension](http://zalmoxisus.github.io/redux-devtools-extension/)
+
+2. In your root Angular module import `StoreDevtoolsModule.instrumentOnlyWithExtension()`:
+
+  ```ts
+  import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+
+  @NgModule({
+    imports: [
+      StoreModule.provideStore(rootReducer),
+      StoreDevtoolsModule.instrumentOnlyWithExtension()
+    ]
+  })
+  export class AppModule { }
+  ```
+
+### Instrumentation with a Custom Monitor
+To instrument @ngrx/store and use the devtools with a custom monitor you will need to setup the 
+instrumentation providers using `instrumentStore()`:
 
 ```ts
 import {StoreDevtoolsModule} from '@ngrx/store-devtools';
@@ -23,6 +44,7 @@ import {StoreDevtoolsModule} from '@ngrx/store-devtools';
     })
   ]
 })
+export class AppModule { }
 ```
 
 See [@ngrx/store-log-monitor](https://github.com/ngrx/store-log-monitor) for an example monitor built for Angular 2
