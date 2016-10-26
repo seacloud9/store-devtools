@@ -1,11 +1,12 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, OnDestroy } from '@angular/core';
 import { State, INITIAL_STATE, INITIAL_REDUCER, Dispatcher, Reducer } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Observer } from 'rxjs/Observer';
+import { Subscription } from 'rxjs/Subscription';
 import { map } from 'rxjs/operator/map';
 import { merge } from 'rxjs/operator/merge';
 import { observeOn } from 'rxjs/operator/observeOn';
-import { publishReplay } from 'rxjs/operator/publishReplay';
 import { scan } from 'rxjs/operator/scan';
 import { skip } from 'rxjs/operator/skip';
 import { withLatestFrom } from 'rxjs/operator/withLatestFrom';
@@ -21,7 +22,8 @@ import { StoreDevtoolsConfig, STORE_DEVTOOLS_CONFIG } from './config';
 export class DevtoolsDispatcher extends Dispatcher { }
 
 @Injectable()
-export class StoreDevtools implements Observer<any> {
+export class StoreDevtools implements Observer<any>, OnDestroy {
+  private stateSubscription: Subscription;
   public dispatcher: Dispatcher;
   public liftedState: Observable<LiftedState>;
   public state: Observable<any>;
@@ -39,7 +41,7 @@ export class StoreDevtools implements Observer<any> {
       maxAge: config.maxAge
     });
 
-    const liftedActions$ = applyOperators(actions$, [
+    const liftedAction$ = applyOperators(actions$, [
       [ skip, 1 ],
       [ merge, extension.actions$ ],
       [ map, liftAction ],
@@ -47,25 +49,27 @@ export class StoreDevtools implements Observer<any> {
       [ observeOn, queue ]
     ]);
 
-    const liftedReducers$ = map.call(reducers$, liftReducer);
+    const liftedReducer$ = map.call(reducers$, liftReducer);
 
-    const liftedState = (applyOperators(liftedActions$, [
-      [ withLatestFrom, liftedReducers$ ],
+    const liftedStateSubject = new ReplaySubject(1);
+    const liftedStateSubscription = applyOperators(liftedAction$, [
+      [ withLatestFrom, liftedReducer$ ],
       [ scan, (liftedState, [ action, reducer ]) => {
         const nextState = reducer(liftedState, action);
 
         extension.notify(action, nextState);
 
         return nextState;
-      }, liftedInitialState],
-      [ publishReplay, 1 ]
-    ]) as any).refCount();
+      }, liftedInitialState]
+    ]).subscribe(liftedStateSubject);
 
-    const state = map.call(liftedState, unliftState);
+    const liftedState$ = liftedStateSubject.asObservable();
+    const state$ = map.call(liftedState$, unliftState);
 
+    this.stateSubscription = liftedStateSubscription;
     this.dispatcher = dispatcher;
-    this.liftedState = liftedState;
-    this.state = state;
+    this.liftedState = liftedState$;
+    this.state = state$;
   }
 
   dispatch(action) {
@@ -110,5 +114,9 @@ export class StoreDevtools implements Observer<any> {
 
   importState(nextLiftedState: any) {
     this.dispatch(actions.importState(nextLiftedState));
+  }
+
+  ngOnDestroy() {
+    this.stateSubscription.unsubscribe();
   }
 }

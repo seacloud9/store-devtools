@@ -7,13 +7,18 @@ import { DevtoolsExtension, REDUX_DEVTOOLS_EXTENSION } from './extension';
 
 
 export function _createReduxDevtoolsExtension() {
-  const extensionKey = 'devToolsExtension';
+  const legacyExtensionKey = 'devToolsExtension';
+  const extensionKey = '__REDUX_DEVTOOLS_EXTENSION__';
 
-  if (typeof window === 'object' && typeof window[extensionKey] !== 'undefined') {
+  if (typeof window === 'object' && typeof window[legacyExtensionKey] !== 'undefined') {
+    return window[legacyExtensionKey];
+  }
+  else if (typeof window === 'object' && typeof window[extensionKey] !== 'undefined') {
     return window[extensionKey];
   }
-
-  return null;
+  else {
+    return null;
+  }
 }
 
 export function _createState(devtools: StoreDevtools) {
