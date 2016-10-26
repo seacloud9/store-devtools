@@ -22,7 +22,7 @@ import { StoreDevtoolsConfig, STORE_DEVTOOLS_CONFIG } from './config';
 export class DevtoolsDispatcher extends Dispatcher { }
 
 @Injectable()
-export class StoreDevtools implements Observer<any>, OnDestroy {
+export class StoreDevtools implements Observer<any> {
   private stateSubscription: Subscription;
   public dispatcher: Dispatcher;
   public liftedState: Observable<LiftedState>;
@@ -114,9 +114,5 @@ export class StoreDevtools implements Observer<any>, OnDestroy {
 
   importState(nextLiftedState: any) {
     this.dispatch(actions.importState(nextLiftedState));
-  }
-
-  ngOnDestroy() {
-    this.stateSubscription.unsubscribe();
   }
 }
