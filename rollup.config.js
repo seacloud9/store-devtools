@@ -10,6 +10,7 @@ export default {
     
     'rxjs/Observable': 'Rx',
     'rxjs/BehaviorSubject': 'Rx',
+    'rxjs/ReplaySubject': 'Rx',
     'rxjs/Subscriber': 'Rx',
     
     'rxjs/scheduler/queue': 'Rx.Scheduler',
