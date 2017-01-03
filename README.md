@@ -9,7 +9,7 @@ Devtools for [@ngrx/store](https://github.com/ngrx/store).
 
 
 ## Instrumentation
-### Instrumentation with the Chrome Extension (Preferred)
+### Instrumentation with the Chrome / Firefox Extension (Preferred)
 
 1. Download the [Redux Devtools Extension](http://zalmoxisus.github.io/redux-devtools-extension/)
 
