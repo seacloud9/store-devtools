@@ -1,3 +1,60 @@
+<a name="3.2.4"></a>
+## [3.2.4](https://github.com/ngrx/devtools/compare/v3.2.3...v3.2.4) (2017-03-24)
+
+
+### Bug Fixes
+
+* **StoreDevtools:** Eagerly inject initial state and reducers ([c2abe11](https://github.com/ngrx/devtools/commit/c2abe11))
+
+
+
+<a name="3.2.3"></a>
+## [3.2.3](https://github.com/ngrx/devtools/compare/v3.2.2...v3.2.3) (2017-01-19)
+
+
+### Bug Fixes
+
+* **devtools:** Fixed AOT bug when providing devtools config options ([#52](https://github.com/ngrx/devtools/issues/52)) ([d21ab15](https://github.com/ngrx/devtools/commit/d21ab15))
+
+
+
+<a name="3.2.2"></a>
+## [3.2.2](https://github.com/ngrx/devtools/compare/v3.2.1...v3.2.2) (2016-11-04)
+
+
+### Bug Fixes
+
+* **bundles:** Correctly alias ReplaySubject ([1a65e6d](https://github.com/ngrx/devtools/commit/1a65e6d))
+* **extension:** Fix unsubscribing from the extension ([#37](https://github.com/ngrx/devtools/issues/37)) ([f5d068d](https://github.com/ngrx/devtools/commit/f5d068d)), closes [#33](https://github.com/ngrx/devtools/issues/33)
+
+
+
+<a name="3.2.1"></a>
+## [3.2.1](https://github.com/ngrx/devtools/compare/v3.2.0...v3.2.1) (2016-10-26)
+
+
+### Bug Fixes
+
+* **StoreDevtools:** Prevent reducer undefined error ([bb1e25d](https://github.com/ngrx/devtools/commit/bb1e25d))
+
+
+
+<a name="3.2.0"></a>
+# [3.2.0](https://github.com/ngrx/devtools/compare/v3.0.1...v3.2.0) (2016-10-26)
+
+
+### Bug Fixes
+
+* **Extension:** Get Chrome extension working correctly ([d1abedd](https://github.com/ngrx/devtools/commit/d1abedd))
+* **State:** Stop using a refcounted observable to contain state ([d4a6382](https://github.com/ngrx/devtools/commit/d4a6382)), closes [#25](https://github.com/ngrx/devtools/issues/25)
+
+
+### Features
+
+* **Devtools:** Enable instrumenting store conditionally if extension is present ([a1b6dfc](https://github.com/ngrx/devtools/commit/a1b6dfc))
+
+
+
 <a name="3.0.1"></a>
 ## [3.0.1](https://github.com/ngrx/devtools/compare/v3.0.0...v3.0.1) (2016-09-01)
 
